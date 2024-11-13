@@ -8,6 +8,9 @@ Route::prefix('auth')->group(function (){
     Route::post('login', [$authController, 'login']);
     Route::post('register', [$authController, 'register']);
     Route::post('reset', [$authController, 'reset']);
-    Route::post('forgot', [$authController, 'forgot']);
-    Route::post('logout', [$authController, 'logout']);
+
+    Route::middleware('jwt.auth')->group(function()use($authController) {
+        Route::delete('logout', [$authController, 'logout']);
+        Route::post('forgot', [$authController, 'forgot']);
+    });
 });
