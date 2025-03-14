@@ -23,7 +23,7 @@ class AccountRepository
         return $this->model->where('account', $account)->first();
     }
 
-    public function findAccount2(string $value)
+    public function findEmail(string $value)
     {
         return $this->model->where('email', $value)->first();
     }

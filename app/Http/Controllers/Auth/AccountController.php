@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\JwtAuthMiddleware;
 use App\Services\Auth\AccountServices;
 use Illuminate\Http\Request;
 
 class AccountController extends Controller
 {
     protected $accountServices;
-    public function __construct(AccountServices $accountServices)
+    protected $jwtAuthMiddleware;
+    
+    public function __construct(AccountServices $accountServices, JwtAuthMiddleware $jwtAuthMiddleware)
     {
         $this->accountServices = $accountServices;
-        // $this->middleware('auth:api', ['except' => 'login', 'register']);
+        $this->middleware('jwt.auth', ['except' => ['login', 'register']]);
     }
 
     public function register(Request $request)
@@ -20,13 +23,13 @@ class AccountController extends Controller
         try {
             $account = $this->accountServices->register($request);
             return response()->json([
-                'status' => '1',
+                'status' => true,
                 'message' => '註冊成功',
                 'user' => $account,
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => '0',
+                'status' => false,
                 'message' => $e->getMessage(),
             ], 400);
         }
@@ -37,13 +40,13 @@ class AccountController extends Controller
         try {
             $login = $this->accountServices->login($request);
             return response()->json([
-                'status' => '1',
+                'status' => true,
                 'message' => '登入成功',
                 'data' => $login,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => '0',
+                'status' => false,
                 'message' => $e->getMessage(),
             ], 401);
         }
@@ -52,14 +55,20 @@ class AccountController extends Controller
     public function logout(Request $request)
     {
         try {
-           $result = $this->accountServices->logout();
-           return response()->json([
-            'status' => 1,
-            'message' => 'SUCCESS'
-           ]);
+            $currentUser = auth('api')->user();
+            
+            $result = $this->accountServices->logout();
+            
+            return response()->json([
+                'status' => true,
+                'message' => '登出成功',
+                'data' => [
+                    'account' => $currentUser->account
+                ]
+            ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => '0',
+                'status' => false,
                 'message' => $e->getMessage(),
             ], 401);
         }

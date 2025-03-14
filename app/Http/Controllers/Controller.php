@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\ApiResponse;
 abstract class Controller
 {
-        /**
+    use ApiResponse;
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
